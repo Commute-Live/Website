@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { toApiUrl } from "@/lib/api"
 
 type FormState = {
   name: string
@@ -14,7 +15,11 @@ const initialState: FormState = {
   email: "",
 }
 
-export function WaitlistForm() {
+type WaitlistFormProps = {
+  salesModeEnabled: boolean
+}
+
+export function WaitlistForm({ salesModeEnabled }: WaitlistFormProps) {
   const [form, setForm] = useState<FormState>(initialState)
   const [status, setStatus] = useState<"idle" | "submitting" | "success" | "error">("idle")
   const [message, setMessage] = useState("")
@@ -25,18 +30,36 @@ export function WaitlistForm() {
     setMessage("")
 
     try {
-      const response = await fetch("/api/waitlist", {
+      const response = await fetch(toApiUrl(salesModeEnabled ? "/checkout/session" : "/waitlist"), {
         method: "POST",
         headers: {
+          "Accept": "application/json",
           "Content-Type": "application/json",
         },
         body: JSON.stringify(form),
       })
 
-      const data = (await response.json()) as { error?: string; message?: string }
+      const contentType = response.headers.get("content-type") ?? ""
+      const rawBody = await response.text()
+      const data = contentType.includes("application/json")
+        ? (JSON.parse(rawBody) as { error?: string; message?: string; url?: string })
+        : null
+
+      if (!data && !response.ok) {
+        throw new Error("The server returned HTML instead of JSON. Check NEXT_PUBLIC_API_BASE_URL and your API deployment.")
+      }
+
+      if (!data) {
+        throw new Error("The server returned an unexpected response format.")
+      }
 
       if (!response.ok) {
         throw new Error(data.error ?? "Something went wrong.")
+      }
+
+      if (salesModeEnabled && data.url) {
+        window.location.assign(data.url)
+        return
       }
 
       setStatus("success")
@@ -59,7 +82,9 @@ export function WaitlistForm() {
     >
       <div className="mb-5">
         <p className="text-sm leading-6 text-muted-foreground">
-          Get launch updates and early access when CommuteLive is ready.
+          {salesModeEnabled
+            ? "Enter your details to start checkout for the first CommuteLive release."
+            : "Get launch updates and early access when CommuteLive is ready."}
         </p>
       </div>
 
@@ -81,7 +106,13 @@ export function WaitlistForm() {
         />
 
         <Button type="submit" size="lg" disabled={status === "submitting"} className="h-12">
-          {status === "submitting" ? "Joining..." : "Join Waitlist"}
+          {status === "submitting"
+            ? salesModeEnabled
+              ? "Opening Checkout..."
+              : "Joining..."
+            : salesModeEnabled
+              ? "Continue to Checkout"
+              : "Join Waitlist"}
         </Button>
 
         {message ? (

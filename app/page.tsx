@@ -9,6 +9,7 @@ import { TransitAgencyLogo } from "@/components/transit-agency-logos"
 import { Section, SectionHeader } from "@/components/section"
 import { WaitlistForm } from "@/components/waitlist-form"
 import { Button } from "@/components/ui/button"
+import { isSalesModeEnabled } from "@/lib/env"
 import {
   Accordion,
   AccordionContent,
@@ -105,9 +106,26 @@ const faqItems = [
 ]
 
 export default function HomePage() {
+  const salesModeEnabled = isSalesModeEnabled()
+  const ctaLabel = salesModeEnabled ? "Buy Now" : "Join Waitlist"
+  const heroBadgeLabel = salesModeEnabled ? "Checkout live now" : "Waitlist open now"
+  const waitlistLabel = salesModeEnabled ? "Checkout" : "Waitlist"
+  const waitlistTitle = salesModeEnabled ? "Buy CommuteLive" : "Join the waitlist"
+  const waitlistDescription = salesModeEnabled
+    ? "Start checkout for the first CommuteLive release."
+    : "Be first to hear when CommuteLive is ready."
+  const subscriptionAnswer = salesModeEnabled
+    ? "No. This launch flow is configured as a one-time purchase through Stripe Checkout."
+    : "The site is in waitlist mode right now, so final pricing and launch packaging are still being finalized."
+  const pageFaqItems = faqItems.map((item) =>
+    item.question === "Is this a subscription?"
+      ? { ...item, answer: subscriptionAnswer }
+      : item,
+  )
+
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <Navbar />
+      <Navbar ctaLabel={ctaLabel} />
       <main className="overflow-hidden">
         <section className="relative isolate pt-24 md:pt-[7.5rem]">
           <div className="absolute inset-x-0 top-0 -z-10 h-[42rem] bg-[radial-gradient(circle_at_top,rgba(0,194,255,0.24),transparent_42%),linear-gradient(180deg,rgba(9,14,25,0.96),rgba(9,14,25,0.78),transparent)]" />
@@ -116,7 +134,7 @@ export default function HomePage() {
               <div className="space-y-8">
                 <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-white/70">
                   <BellRing className="h-4 w-4 text-primary" />
-                  Waitlist open now
+                  {heroBadgeLabel}
                 </div>
 
                 <div className="space-y-5">
@@ -136,7 +154,7 @@ export default function HomePage() {
                 <div className="flex flex-col gap-3 sm:flex-row">
                   <Button size="lg" className="h-12 px-6 text-base" asChild>
                     <Link href="#waitlist">
-                      Join Waitlist
+                      {ctaLabel}
                       <ArrowRight className="ml-2 h-4 w-4" />
                     </Link>
                   </Button>
@@ -217,15 +235,15 @@ export default function HomePage() {
           <div className="container mx-auto px-4 md:px-6">
             <div className="mx-auto max-w-2xl text-center">
               <SectionHeader
-                label="Waitlist"
-                title="Join the waitlist"
-                description="Be first to hear when CommuteLive is ready."
+                label={waitlistLabel}
+                title={waitlistTitle}
+                description={waitlistDescription}
                 className="mb-8"
               />
             </div>
 
             <div className="mx-auto max-w-xl">
-              <WaitlistForm />
+              <WaitlistForm salesModeEnabled={salesModeEnabled} />
             </div>
           </div>
         </Section>
@@ -240,7 +258,7 @@ export default function HomePage() {
 
             <div className="mx-auto max-w-6xl space-y-4">
               <Accordion type="single" collapsible className="space-y-4">
-                {faqItems.map((item, index) => (
+                {pageFaqItems.map((item, index) => (
                   <AccordionItem
                     key={item.question}
                     value={`item-${index}`}
@@ -259,7 +277,7 @@ export default function HomePage() {
           </div>
         </Section>
       </main>
-      <Footer />
+      <Footer salesModeEnabled={salesModeEnabled} ctaLabel={ctaLabel} />
     </div>
   )
 }

@@ -1,14 +1,20 @@
 import Image from "next/image"
 import Link from "next/link"
 
-const footerLinks = [
+const baseFooterLinks = [
   { label: "What It Is", href: "#what-it-is" },
   { label: "Supported Systems", href: "#supported-systems" },
   { label: "FAQ", href: "#faq" },
-  { label: "Join Waitlist", href: "#waitlist" },
 ]
 
-export function Footer() {
+type FooterProps = {
+  salesModeEnabled: boolean
+  ctaLabel: string
+}
+
+export function Footer({ salesModeEnabled, ctaLabel }: FooterProps) {
+  const footerLinks = [...baseFooterLinks, { label: ctaLabel, href: "#waitlist" }]
+
   return (
     <footer className="border-t border-border bg-card/50" id="contact">
       <div className="container mx-auto px-4 py-12 md:px-6 md:py-16">
@@ -25,8 +31,9 @@ export function Footer() {
             </Link>
             <p className="max-w-xl text-sm leading-7 text-muted-foreground">
               CommuteLive is a dedicated display for real-time arrivals at home.
-              This site is focused on explaining the product clearly and collecting
-              launch interest through the waitlist.
+              {salesModeEnabled
+                ? " This site is focused on explaining the product clearly and sending buyers into checkout."
+                : " This site is focused on explaining the product clearly and collecting launch interest through the waitlist."}
             </p>
           </div>
 
@@ -49,10 +56,12 @@ export function Footer() {
 
         <div className="flex flex-col items-center justify-between gap-4 border-t border-border pt-8 md:flex-row">
           <p className="text-sm text-muted-foreground">
-            © {new Date().getFullYear()} CommuteLive.
+            &copy; {new Date().getFullYear()} CommuteLive.
           </p>
           <p className="text-sm text-muted-foreground">
-            Waitlist phase. Product details will keep evolving.
+            {salesModeEnabled
+              ? "Checkout is live. Product details will keep evolving."
+              : "Waitlist phase. Product details will keep evolving."}
           </p>
         </div>
       </div>

@@ -103,10 +103,12 @@ const faqs = [
 
 export default function ProductPage() {
   const [selectedImage, setSelectedImage] = useState(0)
+  const salesModeEnabled = process.env.NEXT_PUBLIC_SALES_MODE_ENABLED === "true"
+  const ctaLabel = salesModeEnabled ? "Buy Now" : "Join Waitlist"
 
   return (
     <div className="min-h-screen bg-background">
-      <Navbar />
+      <Navbar ctaLabel={ctaLabel} />
       <main className="pb-16 pt-20">
         <div className="container mx-auto px-4 md:px-6">
           <Link
@@ -180,7 +182,7 @@ export default function ProductPage() {
 
               <div className="space-y-3">
                 <Button className="w-full" size="lg" asChild>
-                  <Link href="/#waitlist">Join Waitlist</Link>
+                  <Link href="/#waitlist">{ctaLabel}</Link>
                 </Button>
                 <Button variant="outline" className="w-full" size="lg" asChild>
                   <Link href="/">Back to homepage</Link>
@@ -261,7 +263,7 @@ export default function ProductPage() {
           </div>
         </div>
       </main>
-      <Footer />
+      <Footer salesModeEnabled={salesModeEnabled} ctaLabel={ctaLabel} />
     </div>
   )
 }

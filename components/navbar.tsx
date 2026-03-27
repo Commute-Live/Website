@@ -14,7 +14,11 @@ const navLinks = [
   { href: "#faq", label: "FAQ" },
 ]
 
-export function Navbar() {
+type NavbarProps = {
+  ctaLabel: string
+}
+
+export function Navbar({ ctaLabel }: NavbarProps) {
   const [isScrolled, setIsScrolled] = useState(false)
   const [isOpen, setIsOpen] = useState(false)
 
@@ -61,7 +65,7 @@ export function Navbar() {
 
         <div className="hidden md:flex">
           <Button asChild>
-            <Link href="#waitlist">Join Waitlist</Link>
+            <Link href="#waitlist">{ctaLabel}</Link>
           </Button>
         </div>
 
@@ -86,7 +90,7 @@ export function Navbar() {
                   </Link>
                 ))}
                 <Button className="mt-4" asChild onClick={() => setIsOpen(false)}>
-                  <Link href="#waitlist">Join Waitlist</Link>
+                  <Link href="#waitlist">{ctaLabel}</Link>
                 </Button>
               </div>
             </SheetContent>
