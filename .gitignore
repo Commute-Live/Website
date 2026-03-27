@@ -9,3 +9,4 @@ node_modules/
 .next/
 .DS_Store
 data/waitlist-submissions.json
+.env
